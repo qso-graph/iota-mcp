@@ -58,6 +58,60 @@ Add to `.claude/settings.json`:
 }
 ```
 
+#### ChatGPT Desktop
+
+```json
+{
+  "mcpServers": {
+    "iota": {
+      "command": "iota-mcp"
+    }
+  }
+}
+```
+
+#### Cursor
+
+Add to `.cursor/mcp.json` (project-level) or `~/.cursor/mcp.json` (global):
+
+```json
+{
+  "mcpServers": {
+    "iota": {
+      "command": "iota-mcp"
+    }
+  }
+}
+```
+
+#### VS Code / GitHub Copilot
+
+Add to `.vscode/mcp.json` in your workspace:
+
+```json
+{
+  "servers": {
+    "iota": {
+      "command": "iota-mcp"
+    }
+  }
+}
+```
+
+#### Gemini CLI
+
+Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
+
+```json
+{
+  "mcpServers": {
+    "iota": {
+      "command": "iota-mcp"
+    }
+  }
+}
+```
+
 ### Example Prompts
 
 - "Look up IOTA group NA-005"
