@@ -56,7 +56,7 @@ def iota_lookup(refno: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def iota_search(query: str, limit: int = 25) -> dict[str, Any]:
+def iota_search(query: str, limit: int | None = 25) -> dict[str, Any]:
     """Search IOTA groups and islands by name.
 
     Searches both group names and individual island names.
@@ -70,6 +70,7 @@ def iota_search(query: str, limit: int = 25) -> dict[str, Any]:
         List of matching IOTA groups with details.
     """
     try:
+        limit = limit if limit is not None else 25
         results = _get_client().search(query, limit=limit)
         return {"query": query, "total": len(results), "groups": results}
     except Exception as e:
@@ -95,7 +96,7 @@ def iota_islands(refno: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def iota_dxcc(dxcc_num: str = "", refno: str = "") -> dict[str, Any]:
+def iota_dxcc(dxcc_num: str | None = "", refno: str | None = "") -> dict[str, Any]:
     """Bidirectional DXCC-to-IOTA mapping.
 
     Provide either dxcc_num to find all IOTA groups for a DXCC entity,
@@ -109,6 +110,8 @@ def iota_dxcc(dxcc_num: str = "", refno: str = "") -> dict[str, Any]:
         Mapping between DXCC entities and IOTA groups.
     """
     try:
+        dxcc_num = dxcc_num or ""
+        refno = refno or ""
         return _get_client().dxcc_lookup(dxcc_num=dxcc_num, refno=refno)
     except Exception as e:
         return {"error": str(e)}
@@ -134,7 +137,7 @@ def iota_stats() -> dict[str, Any]:
 def iota_nearby(
     latitude: float,
     longitude: float,
-    limit: int = 20,
+    limit: int | None = 20,
 ) -> dict[str, Any]:
     """Find IOTA groups nearest to a location.
 
@@ -150,6 +153,7 @@ def iota_nearby(
         List of nearest IOTA groups sorted by distance in km.
     """
     try:
+        limit = limit if limit is not None else 20
         results = _get_client().nearby(latitude, longitude, limit=limit)
         return {
             "latitude": latitude,
