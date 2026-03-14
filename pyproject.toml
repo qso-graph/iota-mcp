@@ -1,6 +1,6 @@
 [project]
 name = "iota-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for Islands on the Air — group lookup, island search, DXCC mapping"
 readme = "README.md"
 license = {text = "GPL-3.0-or-later"}
