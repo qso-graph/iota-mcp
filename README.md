@@ -21,6 +21,7 @@ pip install iota-mcp
 | `iota_dxcc` | Bidirectional DXCC-to-IOTA mapping |
 | `iota_stats` | Programme summary — totals by continent, most/least credited |
 | `iota_nearby` | Find IOTA groups nearest to a lat/lon location |
+| `get_version_info` | Service version + upstream programme data version (fleet identity attestation) |
 
 ## Quick Start
 
