@@ -1,6 +1,9 @@
 <!-- mcp-name: io.github.qso-graph/iota-mcp -->
 # iota-mcp
 
+[![PyPI](https://img.shields.io/pypi/v/iota-mcp?label=PyPI&color=blue)](https://pypi.org/project/iota-mcp/)
+[![MCP Registry](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fregistry.modelcontextprotocol.io%2Fv0%2Fservers%3Fsearch%3Diota-mcp&query=%24.servers%5B0%5D.server.version&label=MCP%20Registry&color=blue)](https://registry.modelcontextprotocol.io/v0/servers?search=iota-mcp)
+
 MCP server for [Islands on the Air (IOTA)](https://www.iota-world.org/) — group lookup, island search, DXCC mapping, nearby groups, and programme statistics through any MCP-compatible AI assistant.
 
 Part of the [qso-graph](https://qso-graph.io/) project. **No authentication required** — all IOTA data is public.
@@ -113,14 +116,20 @@ Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
 }
 ```
 
-### Example Prompts
+### Ask questions
 
-- "Look up IOTA group NA-005"
-- "Search for islands named Shetland"
-- "What IOTA groups are near Boise, Idaho?"
-- "Show me all islands in EU-005"
-- "What IOTA references map to DXCC 291?"
-- "Give me IOTA programme statistics"
+> "Look up IOTA group NA-005"
+
+> "Search for islands named Shetland"
+
+> "What IOTA groups are near Boise, Idaho?"
+
+> "Show me all islands in EU-005"
+
+> "What IOTA references map to DXCC 291?"
+
+> "Give me IOTA programme statistics"
+
 
 ## Data Source
 
@@ -131,22 +140,26 @@ Data comes from the official [IOTA website](https://www.iota-world.org/) JSON do
 
 Data is downloaded once and cached for 24 hours (IOTA refreshes daily at 00:00 UTC).
 
+## Testing Without Network
+
+```bash
+IOTA_MCP_MOCK=1 iota-mcp
+```
+
+## MCP Inspector
+
+```bash
+iota-mcp --transport streamable-http --port 8010
+```
+
+Then open the MCP Inspector at `http://localhost:8010`.
+
 ## Development
 
 ```bash
 git clone https://github.com/qso-graph/iota-mcp.git
 cd iota-mcp
 pip install -e .
-
-# Run with mock data (no network)
-IOTA_MCP_MOCK=1 python -m iota_mcp.server
-
-# Run with MCP Inspector
-iota-mcp --transport streamable-http --port 8010
-
-# Security tests
-pip install pytest
-pytest tests/test_security.py -v
 ```
 
 ## License
