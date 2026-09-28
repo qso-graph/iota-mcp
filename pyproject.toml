@@ -35,6 +35,10 @@ Issues = "https://github.com/qso-graph/iota-mcp/issues"
 [project.scripts]
 iota-mcp = "iota_mcp.server:main"
 
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
