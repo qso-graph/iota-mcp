@@ -11,7 +11,8 @@ Part of the [qso-graph](https://qso-graph.io/) project. **No authentication requ
 ## Install
 
 ```bash
-pip install iota-mcp
+uvx iota-mcp            # run it; nothing to install
+pip install iota-mcp    # or install it into your own environment
 ```
 
 ## Tools
@@ -42,7 +43,8 @@ Add to `claude_desktop_config.json` (`~/Library/Application Support/Claude/` on 
 {
   "mcpServers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
@@ -56,7 +58,8 @@ Add to `.claude/settings.json`:
 {
   "mcpServers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
@@ -68,7 +71,8 @@ Add to `.claude/settings.json`:
 {
   "mcpServers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
@@ -82,7 +86,8 @@ Add to `.cursor/mcp.json` (project-level) or `~/.cursor/mcp.json` (global):
 {
   "mcpServers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
@@ -96,7 +101,8 @@ Add to `.vscode/mcp.json` in your workspace:
 {
   "servers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
@@ -110,11 +116,14 @@ Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
 {
   "mcpServers": {
     "iota": {
-      "command": "iota-mcp"
+      "command": "uvx",
+      "args": ["iota-mcp"]
     }
   }
 }
 ```
+
+Installed with pip instead? Use `"command": "iota-mcp"` in any config above.
 
 ### Ask questions
 
@@ -159,7 +168,8 @@ Then open the MCP Inspector at `http://localhost:8010`.
 ```bash
 git clone https://github.com/qso-graph/iota-mcp.git
 cd iota-mcp
-pip install -e .
+uv sync --group dev
+uv run pytest
 ```
 
 ## License
