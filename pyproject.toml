@@ -28,7 +28,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://qso-graph.io"
-Documentation = "https://qso-graph.io"
+Documentation = "https://qso-graph.io/servers/iota/"
 Repository = "https://github.com/qso-graph/iota-mcp"
 Issues = "https://github.com/qso-graph/iota-mcp/issues"
 
