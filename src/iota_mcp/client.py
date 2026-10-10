@@ -252,7 +252,7 @@ class IOTAClient:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 body = resp.read().decode("utf-8", errors="replace")
         except Exception as exc:
-            raise RuntimeError(f"Failed to fetch IOTA data") from exc
+            raise RuntimeError("Failed to fetch IOTA data") from exc
         if not body or body.strip() == "":
             return None
         return json.loads(body)

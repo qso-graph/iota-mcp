@@ -9,13 +9,13 @@ Test IDs: IOTA-L2-001 through IOTA-L2-045
 from __future__ import annotations
 
 import os
+
 import pytest
 
 # Enable mock mode before importing anything
 os.environ["IOTA_MCP_MOCK"] = "1"
 
 from iota_mcp.client import IOTAClient
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
