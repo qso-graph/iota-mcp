@@ -3,6 +3,7 @@
 Run with: pytest tests/test_live.py --live
 """
 import os
+
 import pytest
 
 from iota_mcp.client import IOTAClient
