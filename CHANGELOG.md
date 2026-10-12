@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **`E501` is adopted** (#22, qso-graph-devel#70). It was deliberately ignored while the rules that
+  find defects went in first; this is the pass of its own that deferral was waiting for. It reported
+  **five lines, none of them a defect**, and all five reflowed with no name shortened — three are
+  mock rows carrying IOTA's own field names, and wrapping a dict literal keeps every name in full,
+  so **no exemption was needed**. Formatting and config only; no behaviour change.
+
 - **`certifi` is carried, and the fetch verifies against it** (#21, qso-graph-devel#73). The
   download used `urllib` with no context, so it trusted whichever root store the running Python was
   built against. On macOS that is `/etc/ssl/cert.pem`, a deliberately *reduced* OpenSSL file — 128

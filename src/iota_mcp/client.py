@@ -104,7 +104,8 @@ _MOCK_FULLLIST: list[dict[str, Any]] = [
                 "islands": [
                     {"id": "2001", "island_name": "Oahu", "comment": "", "excluded": "0"},
                     {"id": "2002", "island_name": "Maui", "comment": "", "excluded": "0"},
-                    {"id": "2003", "island_name": "Hawaii (Big Island)", "comment": "", "excluded": "0"},
+                    {"id": "2003", "island_name": "Hawaii (Big Island)",
+                     "comment": "", "excluded": "0"},
                 ],
             }
         ],
@@ -127,7 +128,8 @@ _MOCK_FULLLIST: list[dict[str, Any]] = [
                 "subname": "England",
                 "status": "Active",
                 "islands": [
-                    {"id": "3001", "island_name": "Great Britain", "comment": "", "excluded": "0"},
+                    {"id": "3001", "island_name": "Great Britain",
+                     "comment": "", "excluded": "0"},
                 ],
             },
             {
@@ -159,7 +161,8 @@ _MOCK_FULLLIST: list[dict[str, Any]] = [
                 "subname": "[No sub-group]",
                 "status": "Active",
                 "islands": [
-                    {"id": "4001", "island_name": "Grande Comore", "comment": "", "excluded": "0"},
+                    {"id": "4001", "island_name": "Grande Comore",
+                     "comment": "", "excluded": "0"},
                     {"id": "4002", "island_name": "Moheli", "comment": "", "excluded": "0"},
                     {"id": "4003", "island_name": "Anjouan", "comment": "", "excluded": "0"},
                 ],
