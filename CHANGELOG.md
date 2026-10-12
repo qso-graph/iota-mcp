@@ -5,6 +5,27 @@ All notable changes to `iota-mcp` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- **Tool execution errors are flagged `isError`** (#23). Every tool returned `{"error": "..."}` on
+  failure, which reaches a client as a *successful* call whose payload happens to contain the word
+  "error". The specification says why that matters: otherwise "the LLM would not be able to see
+  that an error occurred and self-correct". They now raise `ToolError`, which `fastmcp` reports as
+  `isError: true` with the message intact. **No decision changed — only how it is reported**, and
+  the distinction is now visible: an unknown reference is a failed lookup, while a DXCC entity with
+  no IOTA groups and a search matching nothing are both successful answers. The first could not be
+  answered; the other two are the answer.
+- **Every tool declares all four annotation hints** (#23). Declaring nothing is not neutral: the
+  defaults advertise a tool as `destructiveHint: true`, `openWorldHint: true` and not idempotent,
+  and the specification tells clients to keep a human in the loop for operations like that. All
+  seven are read-only, non-destructive and idempotent; `openWorldHint` is true for the six that
+  consult the IOTA data and false for `get_version_info`. **That data is downloaded from
+  iota-world.org at first use and refreshed on a TTL — it is not carried in the wheel** — so a tool
+  answering from the in-memory index can still cause a request, which is what makes `true` honest.
+  A test asserts both halves of that, since it is not obvious from reading one function.
+- **`tests/test_mcp_conformance.py`** asserts all of the above, following `adif-mcp`'s file of the
+  same name.
+
 ## [0.1.6] — 2026-10-11
 
 - **ruff and mypy run in CI** (qso-graph-devel#66), as a job the `ci-all-green` gate requires.
