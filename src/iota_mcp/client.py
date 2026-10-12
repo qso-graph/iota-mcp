@@ -5,14 +5,45 @@ from __future__ import annotations
 import json
 import math
 import os
+import ssl
 import threading
 import time
 import urllib.request
+from functools import cache
 from typing import Any
+
+import certifi
 
 from . import __version__
 
 _BASE = "https://www.iota-world.org/islands-on-the-air/downloads/download-file.html?path="
+
+
+@cache
+def _context() -> ssl.SSLContext:
+    """A verifying context with a current root set. Built once.
+
+    The roots come from ``certifi`` rather than whichever store the running
+    Python was built against. On macOS that distinction is real: Apple ships
+    ``/etc/ssl/cert.pem`` for OpenSSL — and therefore for Python — as a
+    deliberately *reduced* file, 128 roots against the system keychain's 158.
+    It is current, not stale. But a certificate chaining to one of the 30 it
+    omits fails for Python while ``curl`` to the same URL succeeds
+    (qso-graph-devel#73, found when meteor-mcp could not reach NASA at all).
+
+    iota-world.org verifies fine against the reduced file today, so this is a
+    latent defect rather than an outage: the day any CA in the chain rotates to
+    a root Apple omits, this server stops working on macOS — and because every
+    tool here depends on the one download, it would stop answering entirely
+    rather than degrading, with nothing pointing at trust as the cause.
+
+    Verification is never disabled. ``ssl.CERT_NONE`` or ``check_hostname =
+    False`` would also make a call "work", by accepting any certificate from
+    anyone — a worse defect than this one, and an invisible one. The fix is a
+    complete root set, not a relaxed check.
+    """
+    return ssl.create_default_context(cafile=certifi.where())
+
 _FULLLIST_PATH = "fulllist.json"
 _DXCC_MAP_PATH = "dxcc_matches_one_iota.json"
 
@@ -249,10 +280,14 @@ class IOTAClient:
         req = urllib.request.Request(url, method="GET")
         req.add_header("User-Agent", f"iota-mcp/{__version__}")
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=30, context=_context()) as resp:
                 body = resp.read().decode("utf-8", errors="replace")
         except Exception as exc:
-            raise RuntimeError("Failed to fetch IOTA data") from exc
+            # Named, because since #23 this message is what the client sees as
+            # the tool's error, and "Failed to fetch IOTA data" does not say
+            # which file or why — a model reading it cannot tell an
+            # iota-world.org outage from a defect here.
+            raise RuntimeError(f"Failed to fetch IOTA data ({url}): {exc}") from exc
         if not body or body.strip() == "":
             return None
         return json.loads(body)
