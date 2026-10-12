@@ -6,6 +6,7 @@ import sys
 from typing import Any
 
 from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
 
 from . import __spec_version__, __version__
 from .client import IOTAClient
@@ -35,6 +36,38 @@ def _get_client() -> IOTAClient:
 # Tools
 # ---------------------------------------------------------------------------
 
+# MCP 2026-07-28 tool annotations. The defaults are pessimistic — a tool that
+# declares nothing is advertised as destructive, non-idempotent and open-world,
+# and the specification tells a client to keep a human in the loop for an
+# operation like that. So a client would be entitled to put a confirmation
+# prompt in front of looking up an island group. Every tool here reads and none
+# writes, so the three effect hints are the same for all of them; only
+# openWorldHint differs, and it is read per tool.
+#
+# The IOTA data is downloaded from iota-world.org at first use and refreshed on
+# a TTL — it is not carried in the wheel — so every tool that consults it can
+# cause an outbound request and is open-world, even when it answers from the
+# index already in memory.
+#
+# They are a client's UX hint and never a security control: the specification
+# requires clients to treat them as untrusted, so none of this replaces the
+# reference validation in client.py.
+_READS_IOTA_WORLD = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": True,
+}
+_ANSWERS_FROM_THE_PACKAGE = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    # Reports versions carried in the wheel. It opens no connection.
+    "openWorldHint": False,
+}
+
+
+
 
 def _version_info_payload() -> dict[str, Any]:
     """Build the version info envelope. Pulled into a helper so tests can
@@ -46,7 +79,7 @@ def _version_info_payload() -> dict[str, Any]:
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_ANSWERS_FROM_THE_PACKAGE)
 def get_version_info() -> dict[str, Any]:
     """Get iota-mcp service version and upstream programme data version.
 
@@ -61,7 +94,7 @@ def get_version_info() -> dict[str, Any]:
     return _version_info_payload()
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_lookup(refno: str) -> dict[str, Any]:
     """Look up an IOTA group by reference number.
 
@@ -77,10 +110,10 @@ def iota_lookup(refno: str) -> dict[str, Any]:
     try:
         return _get_client().lookup(refno)
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_search(query: str, limit: int | None = 25) -> dict[str, Any]:
     """Search IOTA groups and islands by name.
 
@@ -99,10 +132,10 @@ def iota_search(query: str, limit: int | None = 25) -> dict[str, Any]:
         results = _get_client().search(query, limit=limit)
         return {"query": query, "total": len(results), "groups": results}
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_islands(refno: str) -> dict[str, Any]:
     """List all islands and subgroups in an IOTA group.
 
@@ -117,10 +150,10 @@ def iota_islands(refno: str) -> dict[str, Any]:
     try:
         return _get_client().islands(refno)
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_dxcc(dxcc_num: str | None = "", refno: str | None = "") -> dict[str, Any]:
     """Bidirectional DXCC-to-IOTA mapping.
 
@@ -139,10 +172,10 @@ def iota_dxcc(dxcc_num: str | None = "", refno: str | None = "") -> dict[str, An
         refno = refno or ""
         return _get_client().dxcc_lookup(dxcc_num=dxcc_num, refno=refno)
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_stats() -> dict[str, Any]:
     """Get IOTA programme summary statistics.
 
@@ -155,10 +188,10 @@ def iota_stats() -> dict[str, Any]:
     try:
         return _get_client().stats()
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READS_IOTA_WORLD)
 def iota_nearby(
     latitude: float,
     longitude: float,
@@ -187,7 +220,7 @@ def iota_nearby(
             "groups": results,
         }
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
 
 # ---------------------------------------------------------------------------

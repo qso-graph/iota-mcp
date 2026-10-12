@@ -5,6 +5,58 @@ All notable changes to `iota-mcp` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-10-12
+
+**Upgrading:** a tool that fails now returns `isError: true` instead of a successful result whose
+payload contained an `error` key. Anything reading `result["error"]` should read the error flag.
+No decision changed, and three things that read alike are now distinguishable: an unknown reference
+is a failed lookup, while a DXCC entity with no IOTA groups (`iota_count: 0`) and a search matching
+nothing (`total: 0`) are both successful answers.
+
+
+- **`E501` is adopted** (#22, qso-graph-devel#70). It was deliberately ignored while the rules that
+  find defects went in first; this is the pass of its own that deferral was waiting for. It reported
+  **five lines, none of them a defect**, and all five reflowed with no name shortened — three are
+  mock rows carrying IOTA's own field names, and wrapping a dict literal keeps every name in full,
+  so **no exemption was needed**. Formatting and config only; no behaviour change.
+
+- **`certifi` is carried, and the fetch verifies against it** (#21, qso-graph-devel#73). The
+  download used `urllib` with no context, so it trusted whichever root store the running Python was
+  built against. On macOS that is `/etc/ssl/cert.pem`, a deliberately *reduced* OpenSSL file — 128
+  roots against the system keychain's 158, and current rather than stale. A certificate chaining to
+  one of the 30 it omits fails for Python while `curl` to the same URL succeeds. That is what
+  stopped `meteor-mcp` reaching NASA. **iota-world.org verifies fine against the reduced file
+  today**, so this was latent rather than an outage — and it would have been total rather than
+  partial, because every tool here depends on the one download.
+- **Verification is never disabled.** `ssl.CERT_NONE` or `check_hostname = False` would also have
+  made such a call "work", by accepting any certificate from anyone. Three static checks hold this
+  in `test_security.py` and two runtime ones in `test_tools.py`, split that way because the release
+  gate runs the first file with the package **not installed**.
+- **`tests/test_release_gate.py`** asserts that precondition rather than leaving it to be
+  remembered: the gate suite may import nothing but the standard library and pytest. solar-mcp's
+  0.3.0 publish failed on exactly that, from the same change.
+- **A failed fetch now names what it could not reach.** Since #23 the message is what a client
+  sees, and `Failed to fetch IOTA data` did not say which file or why.
+
+- **Tool execution errors are flagged `isError`** (#23). Every tool returned `{"error": "..."}` on
+  failure, which reaches a client as a *successful* call whose payload happens to contain the word
+  "error". The specification says why that matters: otherwise "the LLM would not be able to see
+  that an error occurred and self-correct". They now raise `ToolError`, which `fastmcp` reports as
+  `isError: true` with the message intact. **No decision changed — only how it is reported**, and
+  the distinction is now visible: an unknown reference is a failed lookup, while a DXCC entity with
+  no IOTA groups and a search matching nothing are both successful answers. The first could not be
+  answered; the other two are the answer.
+- **Every tool declares all four annotation hints** (#23). Declaring nothing is not neutral: the
+  defaults advertise a tool as `destructiveHint: true`, `openWorldHint: true` and not idempotent,
+  and the specification tells clients to keep a human in the loop for operations like that. All
+  seven are read-only, non-destructive and idempotent; `openWorldHint` is true for the six that
+  consult the IOTA data and false for `get_version_info`. **That data is downloaded from
+  iota-world.org at first use and refreshed on a TTL — it is not carried in the wheel** — so a tool
+  answering from the in-memory index can still cause a request, which is what makes `true` honest.
+  A test asserts both halves of that, since it is not obvious from reading one function.
+- **`tests/test_mcp_conformance.py`** asserts all of the above, following `adif-mcp`'s file of the
+  same name.
+
 ## [0.1.6] — 2026-10-11
 
 - **ruff and mypy run in CI** (qso-graph-devel#66), as a job the `ci-all-green` gate requires.
