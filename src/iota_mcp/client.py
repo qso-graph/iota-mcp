@@ -324,7 +324,7 @@ class IOTAClient:
         ref = refno.upper().strip()
         group = self._by_refno.get(ref)
         if not group:
-            return {"refno": ref, "error": "Not found"}
+            raise LookupError(f"IOTA has no group {ref}.")
         result = self._format_group(group)
         result["comment"] = group.get("comment", "")
         result["subgroup_count"] = len(group.get("sub_groups", []))
@@ -366,7 +366,7 @@ class IOTAClient:
         ref = refno.upper().strip()
         group = self._by_refno.get(ref)
         if not group:
-            return {"refno": ref, "error": "Not found"}
+            raise LookupError(f"IOTA has no group {ref}.")
 
         subgroups = []
         for sg in group.get("sub_groups", []):
@@ -419,7 +419,7 @@ class IOTAClient:
             ref = refno.upper().strip()
             group = self._by_refno.get(ref)
             if not group:
-                return {"refno": ref, "error": "Not found"}
+                raise LookupError(f"IOTA has no group {ref}.")
             dxcc_str = group.get("dxcc_num", "")
             dxcc_list = [d.strip() for d in dxcc_str.split(",") if d.strip()]
             return {
@@ -428,7 +428,7 @@ class IOTAClient:
                 "dxcc_entities": dxcc_list,
             }
 
-        return {"error": "Provide either dxcc_num or refno (not both)"}
+        raise ValueError("Provide either dxcc_num or refno (not both)")
 
     def stats(self) -> dict[str, Any]:
         """Programme summary statistics."""

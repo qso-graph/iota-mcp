@@ -86,10 +86,14 @@ class TestLookup:
         assert result["refno"] == "OC-001"
 
     def test_not_found(self, client):
-        """IOTA-L2-012: Unknown refno returns error."""
-        result = client.lookup("XX-999")
-        assert "error" in result
-        assert result["error"] == "Not found"
+        """IOTA-L2-012: an unknown refno is a failed lookup, and says so.
+
+        Since #23 this raises rather than returning a successful result whose
+        payload held an "error" key. The decision is the same one; a caller can
+        now tell it apart from an answer.
+        """
+        with pytest.raises(LookupError, match="XX-999"):
+            client.lookup("XX-999")
 
     def test_fields_present(self, client):
         """IOTA-L2-013: Lookup result has expected fields."""
@@ -172,9 +176,9 @@ class TestIslands:
         assert "Maui" in names
 
     def test_not_found(self, client):
-        """IOTA-L2-025: Unknown refno returns error."""
-        result = client.islands("XX-999")
-        assert "error" in result
+        """IOTA-L2-025: the same for islands."""
+        with pytest.raises(LookupError, match="XX-999"):
+            client.islands("XX-999")
 
 
 # ---------------------------------------------------------------------------
@@ -203,9 +207,9 @@ class TestDxccLookup:
         assert "114" in result["dxcc_entities"]
 
     def test_no_params_error(self, client):
-        """IOTA-L2-029: No params returns error."""
-        result = client.dxcc_lookup()
-        assert "error" in result
+        """IOTA-L2-029: input the caller can fix, so it is refused not answered."""
+        with pytest.raises(ValueError, match="either dxcc_num or refno"):
+            client.dxcc_lookup()
 
     def test_unknown_dxcc(self, client):
         """IOTA-L2-030: Unknown DXCC returns 0 groups."""
