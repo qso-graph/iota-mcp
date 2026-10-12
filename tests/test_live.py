@@ -154,7 +154,8 @@ def test_stats_live(client):
     """IOTA-L3-009: stats() returns plausible programme totals."""
     result = client.stats()
 
-    assert result["total_groups"] > 1000, f"Expected >1000 groups, got {result['total_groups']}"
+    assert result["total_groups"] > 1000, \
+        f"Expected >1000 groups, got {result['total_groups']}"
     assert result["total_islands"] > 0
     assert result["total_dxcc_entities"] > 0
 
