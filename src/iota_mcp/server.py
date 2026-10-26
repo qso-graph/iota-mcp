@@ -228,8 +228,25 @@ def iota_nearby(
 # ---------------------------------------------------------------------------
 
 
+USAGE = """\
+usage: iota-mcp [--transport stdio|streamable-http] [--port N] [--version] [--help]
+
+An MCP server: an AI app (Claude Desktop, Claude Code, ...) starts it and talks
+to it over stdio. Run on its own it waits for that app; press Ctrl-C to stop.
+Set up a client: https://github.com/qso-graph/iota-mcp#quick-start
+"""
+
+
 def main() -> None:
     """Run the iota-mcp server."""
+    # Without this the script ignored both flags and bound stdio, so
+    # `--help` left a user watching a banner and a hung terminal.
+    if any(a in ("-h", "--help") for a in sys.argv[1:]):
+        print(USAGE, end="")
+        return
+    if "--version" in sys.argv[1:]:
+        print(f"iota-mcp {__version__}")
+        return
     transport = "stdio"
     port = 8010
     for i, arg in enumerate(sys.argv[1:], 1):
