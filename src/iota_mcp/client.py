@@ -8,6 +8,7 @@ import os
 import ssl
 import threading
 import time
+import urllib.error
 import urllib.request
 from functools import cache
 from typing import Any
@@ -49,6 +50,46 @@ _DXCC_MAP_PATH = "dxcc_matches_one_iota.json"
 
 _FULLLIST_TTL = 86400.0  # 24 hours — data refreshes daily at 00:00 UTC
 _MIN_DELAY = 0.2  # 200ms between requests (good neighbor)
+
+# What to do when IOTA says stop.
+#
+# A 429 carrying Retry-After is the provider stating its limit outright, and it
+# is the most explicit form of the stated limit guarantee 8 requires honouring.
+# The interval is bounded rather than taken verbatim: a header asking for a day
+# would strand an interactive tool, and one asking for nothing would let us
+# hammer. See qso-graph-devel/planning/MCP-SECURITY-FRAMEWORK.md.
+_MIN_BACKOFF = 60.0
+_MAX_BACKOFF = 3600.0
+
+
+class RateLimited(RuntimeError):
+    """IOTA asked us to stop. The message is safe to show a user.
+
+    A RuntimeError subclass so callers that already handle this client's
+    failures keep working, and so FastMCP flags the tool result isError either
+    way.
+    """
+
+    def __init__(self, wait: float) -> None:
+        self.retry_after = max(1, round(wait))
+        super().__init__(
+            "IOTA is rate limiting this client; try again in "
+            f"{self.retry_after} s"
+        )
+
+
+def _retry_after(header: str | None) -> float:
+    """Seconds to wait, from a Retry-After header, clamped to our bounds.
+
+    Retry-After may also be an HTTP date. That form is not parsed and falls back
+    to the floor rather than guessing, because a wrong parse would either hammer
+    IOTA or strand the user.
+    """
+    try:
+        seconds = float(header) if header else 0.0
+    except ValueError:
+        seconds = 0.0
+    return min(max(seconds, _MIN_BACKOFF), _MAX_BACKOFF)
 
 
 def _is_mock() -> bool:
@@ -186,6 +227,10 @@ class IOTAClient:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._last_request: float = 0.0
+        # Set by a 429: no call goes out before this. Shared by every endpoint,
+        # because the limit is the provider's view of this client, not of one
+        # path.
+        self._blocked_until: float = 0.0
         self._loaded_at: float = 0.0
         # Indexes
         self._by_refno: dict[str, dict[str, Any]] = {}
@@ -279,12 +324,31 @@ class IOTAClient:
 
     def _get_json(self, url: str) -> Any:
         """HTTP GET, return parsed JSON."""
+        with self._lock:
+            remaining = self._blocked_until - time.monotonic()
+        if remaining > 0:
+            # Still inside a wait iota-world.org asked for. Refusing here is the
+            # point: the alternative is sending the request it told us not to.
+            raise RateLimited(remaining)
         self._rate_limit()
         req = urllib.request.Request(url, method="GET")
         req.add_header("User-Agent", f"iota-mcp/{__version__}")
         try:
             with urllib.request.urlopen(req, timeout=30, context=_context()) as resp:
                 body = resp.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as exc:
+            # An HTTP status needs its own branch, before the catch-all below.
+            # That clause caught every failure alike, so a 429 -- the provider
+            # stating its limit outright -- arrived as "Failed to fetch IOTA
+            # data", indistinguishable from a DNS failure, and nothing could
+            # act on it. 503 counts only with Retry-After, which is a
+            # deliberate shed; a bare 503 is an outage.
+            if exc.code == 429 or (exc.code == 503 and exc.headers.get("Retry-After")):
+                wait = _retry_after(exc.headers.get("Retry-After"))
+                with self._lock:
+                    self._blocked_until = time.monotonic() + wait
+                raise RateLimited(wait) from exc
+            raise RuntimeError(f"Failed to fetch IOTA data ({url}): {exc}") from exc
         except Exception as exc:
             # Named, because since #23 this message is what the client sees as
             # the tool's error, and "Failed to fetch IOTA data" does not say
