@@ -4,9 +4,9 @@
 [![PyPI](https://img.shields.io/pypi/v/iota-mcp?label=PyPI&color=blue)](https://pypi.org/project/iota-mcp/)
 [![MCP Registry](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fregistry.modelcontextprotocol.io%2Fv0%2Fservers%3Fsearch%3Dio.github.qso-graph%2Fiota-mcp%26version%3Dlatest&query=%24.servers%5B0%5D.server.version&label=MCP%20Registry&color=blue)](https://registry.modelcontextprotocol.io/v0/servers?search=io.github.qso-graph/iota-mcp&version=latest)
 
-MCP server for [Islands on the Air (IOTA)](https://www.iota-world.org/) — group lookup, island search, DXCC mapping, nearby groups, and programme statistics through any MCP-compatible AI assistant.
+MCP server for [Islands on the Air (IOTA)](https://www.iota-world.org/)—group lookup, island search, DXCC mapping, nearby groups, and programme statistics through any MCP-compatible AI assistant.
 
-Part of the [qso-graph](https://qso-graph.io/) project. **No authentication required** — all IOTA data is public.
+Part of the [qso-graph](https://qso-graph.io/) project. **No authentication required**—all IOTA data is public.
 
 ## Install
 
@@ -18,21 +18,21 @@ uvx iota-mcp            # run it; nothing to install
 
 | Tool | Description |
 |------|-------------|
-| `iota_lookup` | Look up an IOTA group by reference number (e.g., NA-005) |
-| `iota_search` | Search groups and islands by name (e.g., Hawaii, Shetland) |
+| `iota_lookup` | Look up an IOTA group by reference number (for example, NA-005) |
+| `iota_search` | Search groups and islands by name (for example, Hawaii, Shetland) |
 | `iota_islands` | List all islands and subgroups in an IOTA group |
 | `iota_dxcc` | Bidirectional DXCC-to-IOTA mapping |
-| `iota_stats` | Programme summary — totals by continent, most/least credited |
+| `iota_stats` | Programme summary—totals by continent, most/least credited |
 | `iota_nearby` | Find IOTA groups nearest to a lat/lon location |
 | `get_version_info` | Service version + upstream programme data version (fleet identity attestation) |
 
 ## Quick Start
 
-No credentials needed — just install and configure your MCP client.
+No credentials needed—just install and configure your MCP client.
 
 ### Configure your MCP client
 
-iota-mcp works with any MCP-compatible client. Add the server config and restart — tools appear automatically.
+iota-mcp works with any MCP-compatible client. Add the server config and restart—tools appear automatically.
 
 #### Claude Desktop
 
@@ -141,8 +141,8 @@ Add to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project):
 
 Data comes from the official [IOTA website](https://www.iota-world.org/) JSON downloads:
 
-- **fulllist.json** — complete group/subgroup/island hierarchy (~1.3 MB)
-- **dxcc_matches_one_iota.json** — 1:1 DXCC-to-IOTA mapping (~3.5 KB)
+- **fulllist.json**—complete group/subgroup/island hierarchy (~1.3 MB)
+- **dxcc_matches_one_iota.json**—1:1 DXCC-to-IOTA mapping (~3.5 KB)
 
 Data is downloaded once and cached for 24 hours (IOTA refreshes daily at 00:00 UTC).
 
